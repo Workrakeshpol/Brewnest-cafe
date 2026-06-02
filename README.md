@@ -6,12 +6,12 @@ A modern, cinematic frontend interface for a premium coffee shop. This project d
 
 This project is built with a focus on performance and developer experience:
 
-*   **Frontend Framework:** React 19[cite: 4]
-*   **Build Tool:** Vite[cite: 4]
-*   **Styling:** Tailwind CSS v4[cite: 4]
-*   **Animations:** Framer Motion[cite: 4]
-*   **Icons:** Lucide React[cite: 4]
-*   **Routing:** React Router DOM[cite: 4]
+*   **Frontend Framework:** React 19
+*   **Build Tool:** Vite
+*   **Styling:** Tailwind CSS v4
+*   **Animations:** Framer Motion
+*   **Icons:** Lucide React
+*   **Routing:** React Router DOM
 
 ## 🛠️ Local Development Setup
 
@@ -30,6 +30,11 @@ To run this project locally on your machine, follow these steps:
 3. **Install the dependencies:**
    \`\`\`bash
    npm install
+   \`\`\`
+
+ 4. **Start the development server:**
+   \`\`\`bash
+   npm run dev
    \`\`\`
 
 
