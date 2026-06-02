@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Poppins", system-ui, sans-serif;
+  
+  --color-coffee-brown: #4B2E2B;
+  --color-cream-beige: #F5E6D3;
+  --color-latte-gold: #D9B99B;
+  --color-dark-espresso: #1E1A18;
+  --color-accent-gold: #C89B3C;
+}
+
+/* Base custom styles and smooth scrolling */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-sans);
+  }
+  
+  body {
+    @apply transition-colors duration-300;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #1E1A18;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #4B2E2B;
+    border-radius: 4px;
+    border: 2px solid #1E1A18;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #C89B3C;
+  }
+}
+
+/* Custom premium utility classes */
+@layer utilities {
+  .glass-card-dark {
+    background: rgba(30, 26, 24, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(200, 155, 60, 0.15);
+  }
+
+  .glass-card-light {
+    background: rgba(245, 230, 211, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(75, 46, 43, 0.15);
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 0 10px rgba(200, 155, 60, 0.5);
+  }
+
+  .bg-radial-glow {
+    background: radial-gradient(circle at center, rgba(200, 155, 60, 0.15) 0%, transparent 70%);
+  }
+}
+
+/* Custom Animations */
+@keyframes steam {
+  0% {
+    transform: translateY(0) scaleX(1) scaleY(1);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-20px) scaleX(1.2) scaleY(0.8) rotate(5deg);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-50px) scaleX(1.5) scaleY(1.2) rotate(-5deg);
+    opacity: 0;
+  }
+}
+
+.steam-line {
+  animation: steam 4s infinite linear;
+}
+
+.steam-line-delayed-1 {
+  animation: steam 4.5s infinite linear;
+  animation-delay: 1.2s;
+}
+
+.steam-line-delayed-2 {
+  animation: steam 3.8s infinite linear;
+  animation-delay: 2.5s;
+}
+
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(3deg);
+  }
+}
+
+.animate-float {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 8s infinite ease-in-out;
+}
