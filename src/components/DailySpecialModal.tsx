@@ -1,21 +1,37 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { MENU_ITEMS } from '../data/cafeData';
+import { MenuItem } from '../data/cafeData';
 import { Sparkles, X, ShoppingBag, Clock } from 'lucide-react';
 
 export const DailySpecialModal: React.FC = () => {
-  const { isSpecialModalOpen, setIsSpecialModalOpen, addToCart } = useApp();
+  const { isSpecialModalOpen, setIsSpecialModalOpen, addToCart, menuItems } = useApp();
 
-  // Pick a special bundle: Traditional Tiramisu (m7) and BrewNest Signature Cold Brew (m5)
-  const tiramisu = MENU_ITEMS.find(m => m.id === 'm7');
-  const coldBrew = MENU_ITEMS.find(m => m.id === 'm5');
-
-  if (!tiramisu || !coldBrew) return null;
+  // Pick a special bundle: Traditional Tiramisu and BrewNest Signature Cold Brew
+  const tiramisu = menuItems.find(m => m.name === 'Traditional Tiramisu') || {
+    id: 'm7',
+    name: 'Traditional Tiramisu',
+    description: 'Layers of espresso-soaked ladyfingers, whipped mascarpone cream, dusted with premium dark cocoa powder.',
+    category: 'Desserts' as const,
+    price: 6.50,
+    rating: 4.95,
+    image: '/images/tiramisu.jpg',
+    tags: ['Sweet', 'House Special'],
+  };
+  const coldBrew = menuItems.find(m => m.name === 'BrewNest Signature Cold Brew') || {
+    id: 'm5',
+    name: 'BrewNest Signature Cold Brew',
+    description: 'Single-origin Ethiopian beans cold-steeped for 18 hours, infused with a touch of sweet orange zest and nitrogen charge.',
+    category: 'Cold Brew' as const,
+    price: 4.50,
+    rating: 4.8,
+    image: '/images/cold-brew.jpg',
+    tags: ['Cold', 'Organic', '18hr Steep'],
+  };
 
   const handleAddBundle = () => {
-    addToCart(tiramisu, 1);
-    addToCart(coldBrew, 1);
+    addToCart(tiramisu as MenuItem, 1);
+    addToCart(coldBrew as MenuItem, 1);
     setIsSpecialModalOpen(false);
   };
 

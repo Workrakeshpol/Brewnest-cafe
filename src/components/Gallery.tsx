@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
 import { GALLERY_ITEMS, GalleryItem } from '../data/cafeData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Maximize2, X, ChevronLeft, ChevronRight, Instagram } from 'lucide-react';
 
 export const Gallery: React.FC = () => {
+  const { galleryItems } = useApp();
+  const list = galleryItems.length > 0 ? galleryItems : GALLERY_ITEMS;
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   const handleOpenLightbox = (index: number) => {
@@ -17,13 +20,13 @@ export const Gallery: React.FC = () => {
   const handlePrev = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (lightboxIndex === null) return;
-    setLightboxIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : GALLERY_ITEMS.length - 1));
+    setLightboxIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : list.length - 1));
   };
 
   const handleNext = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (lightboxIndex === null) return;
-    setLightboxIndex((prev) => (prev !== null && prev < GALLERY_ITEMS.length - 1 ? prev + 1 : 0));
+    setLightboxIndex((prev) => (prev !== null && prev < list.length - 1 ? prev + 1 : 0));
   };
 
   return (
@@ -45,7 +48,7 @@ export const Gallery: React.FC = () => {
 
         {/* Pinterest-style Masonry Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 md:auto-rows-[220px]">
-          {GALLERY_ITEMS.map((item, index) => (
+          {list.map((item, index) => (
             <motion.div
               key={item.id}
               initial={{ opacity: 0, y: 20 }}
@@ -84,7 +87,7 @@ export const Gallery: React.FC = () => {
 
       {/* Lightbox Modal */}
       <AnimatePresence>
-        {lightboxIndex !== null && (
+        {lightboxIndex !== null && list[lightboxIndex] && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-md">
             {/* Close trigger on backdrop */}
             <div className="absolute inset-0" onClick={handleCloseLightbox} />
@@ -119,18 +122,18 @@ export const Gallery: React.FC = () => {
               className="relative max-w-4xl max-h-[80vh] w-full flex flex-col items-center z-10"
             >
               <img
-                src={GALLERY_ITEMS[lightboxIndex].image}
-                alt={GALLERY_ITEMS[lightboxIndex].title}
+                src={list[lightboxIndex].image}
+                alt={list[lightboxIndex].title}
                 className="max-h-[70vh] w-auto object-contain rounded-2xl border border-white/10 shadow-2xl"
               />
               
               {/* Image info */}
               <div className="text-center mt-4 max-w-md">
                 <span className="text-xs text-accent-gold uppercase tracking-widest font-sans font-bold">
-                  {GALLERY_ITEMS[lightboxIndex].category}
+                  {list[lightboxIndex].category}
                 </span>
                 <h3 className="font-serif text-xl font-bold text-cream-beige mt-1">
-                  {GALLERY_ITEMS[lightboxIndex].title}
+                  {list[lightboxIndex].title}
                 </h3>
               </div>
             </motion.div>

@@ -5,7 +5,8 @@ import { Sparkles, Clock, Copy, Check, Percent, Gift, Calendar } from 'lucide-re
 import { motion } from 'framer-motion';
 
 export const SpecialOffers: React.FC = () => {
-  const { addToast } = useApp();
+  const { addToast, specialOffers } = useApp();
+  const list = specialOffers.length > 0 ? specialOffers : SPECIAL_OFFERS;
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   
   // Countdown Timer State
@@ -106,7 +107,7 @@ export const SpecialOffers: React.FC = () => {
 
         {/* Offers Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {SPECIAL_OFFERS.map((offer, idx) => {
+          {list.map((offer, idx) => {
             let bgGradient = 'from-coffee-brown/30 to-dark-espresso';
             let icon = <Percent className="w-6 h-6 text-accent-gold" />;
             

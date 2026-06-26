@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
 import { BLOG_POSTS, BlogPostItem } from '../data/cafeData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Calendar, Clock, ArrowRight, X, User, BookOpen } from 'lucide-react';
@@ -44,6 +45,8 @@ const BLOG_CONTENTS: Record<string, { title: string; subtitle: string; content: 
 };
 
 export const Blog: React.FC = () => {
+  const { blogPosts } = useApp();
+  const list = blogPosts.length > 0 ? blogPosts : BLOG_POSTS;
   const [activeArticleId, setActiveArticleId] = useState<string | null>(null);
 
   const handleOpenArticle = (id: string) => {
@@ -55,7 +58,10 @@ export const Blog: React.FC = () => {
   };
 
   const activeArticle = activeArticleId ? BLOG_CONTENTS[activeArticleId] : null;
-  const activeMeta = activeArticleId ? BLOG_POSTS.find((b) => b.id === activeArticleId) : null;
+  const activeMeta = activeArticleId ? list.find((b) => b.id === activeArticleId) : null;
+  const paragraphs = activeMeta?.content
+    ? activeMeta.content.split('\n\n').filter(Boolean)
+    : (activeArticleId && BLOG_CONTENTS[activeArticleId] ? BLOG_CONTENTS[activeArticleId].content : []);
 
   return (
     <section id="blog" className="py-24 bg-dark-espresso text-cream-beige relative">
@@ -76,7 +82,7 @@ export const Blog: React.FC = () => {
 
         {/* Blog Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {BLOG_POSTS.map((post, idx) => (
+          {list.map((post, idx) => (
             <motion.div
               key={post.id}
               initial={{ opacity: 0, y: 30 }}
@@ -146,7 +152,7 @@ export const Blog: React.FC = () => {
 
       {/* Article Full Screen Reader Modal */}
       <AnimatePresence>
-        {activeArticleId && activeArticle && activeMeta && (
+        {activeArticleId && activeMeta && (
           <div className="fixed inset-0 z-50 overflow-y-auto bg-black/95 backdrop-blur-md flex justify-center p-4 md:p-10">
             {/* Backdrop click close */}
             <div className="absolute inset-0" onClick={handleCloseArticle} />
@@ -179,10 +185,10 @@ export const Blog: React.FC = () => {
 
               {/* Title */}
               <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-black text-cream-beige leading-tight mb-2">
-                {activeArticle.title}
+                {activeMeta.title}
               </h2>
               <p className="font-serif text-base text-accent-gold italic mb-6">
-                {activeArticle.subtitle}
+                {activeMeta.excerpt || (activeArticle && activeArticle.subtitle) || ''}
               </p>
 
               {/* Author Info */}
@@ -198,7 +204,7 @@ export const Blog: React.FC = () => {
 
               {/* Article Content Paragraphs */}
               <div className="font-sans text-sm sm:text-base text-cream-beige/80 space-y-5 leading-relaxed text-left">
-                {activeArticle.content.map((paragraph, index) => {
+                {paragraphs.map((paragraph, index) => {
                   // Check if it's a step heading
                   if (paragraph.startsWith('Step ')) {
                     return (

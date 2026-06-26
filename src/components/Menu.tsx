@@ -1,31 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { MENU_ITEMS, MenuItem } from '../data/cafeData';
+import { MenuItem } from '../data/cafeData';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, Heart, ShoppingBag, Sparkles, Flame } from 'lucide-react';
 
 const CATEGORIES = ['All', 'Coffee', 'Cold Brew', 'Desserts', 'Breakfast', 'Signature Drinks'] as const;
 
 export const Menu: React.FC = () => {
-  const { addToCart, favorites, toggleFavorite } = useApp();
+  const { menuItems, addToCart, favorites, toggleFavorite } = useApp();
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [isLoading, setIsLoading] = useState(false);
-  const [filteredItems, setFilteredItems] = useState<MenuItem[]>(MENU_ITEMS);
+  const [filteredItems, setFilteredItems] = useState<MenuItem[]>([]);
 
   // Simulate skeleton loading on category change
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => {
       if (activeCategory === 'All') {
-        setFilteredItems(MENU_ITEMS);
+        setFilteredItems(menuItems);
       } else {
-        setFilteredItems(MENU_ITEMS.filter(item => item.category === activeCategory));
+        setFilteredItems(menuItems.filter(item => item.category === activeCategory));
       }
       setIsLoading(false);
     }, 600);
 
     return () => clearTimeout(timer);
-  }, [activeCategory]);
+  }, [activeCategory, menuItems]);
 
   return (
     <section id="menu" className="py-24 bg-dark-espresso text-cream-beige relative">

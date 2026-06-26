@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { X, ShoppingBag, Plus, Minus, Trash2, Award, Sparkles, CreditCard, ArrowLeft, CheckCircle } from 'lucide-react';
 
 export const CartDrawer: React.FC = () => {
@@ -12,13 +13,18 @@ export const CartDrawer: React.FC = () => {
     removeFromCart,
     cartTotal,
     cartCount,
-    loyaltyPoints,
     checkout,
   } = useApp();
+
+  const { user } = useAuth();
+  const loyaltyPoints = user?.loyalty?.availablePoints || 0;
 
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'payment'>('cart');
   const [pointsRedeemed, setPointsRedeemed] = useState(0);
   const [discountAmount, setDiscountAmount] = useState(0);
+  const [orderType, setOrderType] = useState<'delivery' | 'takeaway' | 'dine_in'>('delivery');
+  const [tableNumber, setTableNumber] = useState('');
+  const [specialInstructions, setSpecialInstructions] = useState('');
 
   const handleRedeemPoints = () => {
     if (loyaltyPoints >= 100) {
@@ -40,11 +46,18 @@ export const CartDrawer: React.FC = () => {
   };
 
   const handleConfirmPayment = () => {
-    checkout(pointsRedeemed);
+    checkout(
+      orderType,
+      orderType === 'dine_in' ? parseInt(tableNumber) || null : null,
+      null,
+      pointsRedeemed > 0 ? 'BREWBOGO' : null
+    );
     // Reset state for next time
     setCheckoutStep('cart');
     setPointsRedeemed(0);
     setDiscountAmount(0);
+    setTableNumber('');
+    setSpecialInstructions('');
   };
 
   return (
@@ -216,6 +229,49 @@ export const CartDrawer: React.FC = () => {
                             * Redeem 100 points to save $5.00. Earn 10 points for every $1 spent!
                           </p>
                         )}
+                      </div>
+                      
+                      {/* Order Type Selector */}
+                      <div className="p-4 rounded-2xl border border-white/5 bg-white/5 space-y-3 text-left">
+                        <label className="text-[10px] uppercase font-sans font-bold tracking-wider text-cream-beige/40 block">Order Option</label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {(['delivery', 'takeaway', 'dine_in'] as const).map((type) => (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => setOrderType(type)}
+                              className={`py-2 rounded-xl border font-bold text-xs capitalize transition-colors ${
+                                orderType === type
+                                  ? 'bg-accent-gold border-accent-gold text-dark-espresso'
+                                  : 'bg-white/5 border-white/10 text-cream-beige/80 hover:text-cream-beige hover:bg-white/10'
+                              }`}
+                            >
+                              {type.replace('_', ' ')}
+                            </button>
+                          ))}
+                        </div>
+                        
+                        {orderType === 'dine_in' && (
+                          <div className="mt-2">
+                            <input
+                              type="number"
+                              placeholder="Table Number (e.g. 5)"
+                              value={tableNumber}
+                              onChange={(e) => setTableNumber(e.target.value)}
+                              className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-cream-beige placeholder-cream-beige/25 text-sm focus:outline-none focus:border-accent-gold/50"
+                            />
+                          </div>
+                        )}
+                        
+                        <div className="mt-2">
+                          <input
+                            type="text"
+                            placeholder="Special instructions (optional)"
+                            value={specialInstructions}
+                            onChange={(e) => setSpecialInstructions(e.target.value)}
+                            className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-cream-beige placeholder-cream-beige/25 text-sm focus:outline-none focus:border-accent-gold/50"
+                          />
+                        </div>
                       </div>
 
                       {/* Pricing Summary */}

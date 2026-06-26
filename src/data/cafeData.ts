@@ -44,6 +44,7 @@ export interface BlogPostItem {
   image: string;
   author: string;
   category: string;
+  content?: string;
 }
 
 export interface SpecialOfferItem {

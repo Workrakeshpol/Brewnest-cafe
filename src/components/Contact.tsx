@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { api } from '../api/client';
 import { Mail, Phone, MapPin, Send, MessageCircle, Sparkles, Facebook, Instagram, Twitter, Compass } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -18,7 +19,7 @@ export const Contact: React.FC = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       addToast('Please fill out all required fields.', 'error');
@@ -26,13 +27,20 @@ export const Contact: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    
-    // Simulate sending
-    setTimeout(() => {
+    try {
+      await api.post('/contact', {
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject || null,
+        message: formData.message,
+      });
       addToast('Thank you! Your message has been sent successfully. ✉️', 'success');
       setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error: any) {
+      addToast(error.message || 'Failed to send message. Please try again.', 'error');
+    } finally {
       setIsSubmitting(false);
-    }, 1500);
+    }
   };
 
   return (

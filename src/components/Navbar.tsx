@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { MENU_ITEMS } from '../data/cafeData';
-import { Menu, X, Search, ShoppingBag, Sun, Moon, Coffee, ArrowRight, Star } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Menu, X, Search, ShoppingBag, Sun, Moon, Coffee, ArrowRight, Star, User, LogOut, Award, LogIn } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Navbar: React.FC = () => {
@@ -14,10 +14,26 @@ export const Navbar: React.FC = () => {
     setIsSearchOpen,
     cartCount,
     setIsCartOpen,
+    menuItems,
+    addToast,
   } = useApp();
+
+  const { user, login, register, logout } = useAuth();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+  
+  // Auth Form states
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
 
   // Scroll handler to make navbar solid on scroll
   useEffect(() => {
@@ -34,7 +50,7 @@ export const Navbar: React.FC = () => {
 
   // Filtered search results
   const searchResults = searchQuery
-    ? MENU_ITEMS.filter((item) =>
+    ? menuItems.filter((item) =>
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -133,6 +149,83 @@ export const Navbar: React.FC = () => {
               >
                 {darkMode ? <Sun className="w-5 h-5 text-accent-gold" /> : <Moon className="w-5 h-5" />}
               </button>
+
+              {/* User Dropdown / Login Button */}
+              <div className="relative">
+                {user ? (
+                  <>
+                    <button
+                      onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                      className={`p-2 rounded-xl flex items-center gap-1.5 transition-all hover:bg-white/10 ${
+                        isScrolled ? 'text-current' : 'text-cream-beige'
+                      }`}
+                      title="User Profile"
+                    >
+                      <User className="w-5 h-5 text-accent-gold" />
+                      <span className="hidden sm:inline text-xs font-semibold">{user.firstName}</span>
+                    </button>
+                    
+                    <AnimatePresence>
+                      {isUserDropdownOpen && (
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setIsUserDropdownOpen(false)} />
+                          <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            className="absolute right-0 mt-2.5 w-60 rounded-2xl bg-dark-espresso border border-accent-gold/20 p-4 shadow-2xl z-50 text-cream-beige text-left"
+                          >
+                            <div className="pb-3 border-b border-white/5 mb-3">
+                              <h4 className="font-serif font-bold text-sm text-accent-gold">{user.firstName} {user.lastName || ''}</h4>
+                              <p className="text-[10px] text-cream-beige/50 font-sans truncate">{user.email}</p>
+                            </div>
+                            
+                            {user.loyalty && (
+                              <div className="p-3 rounded-xl bg-white/5 border border-white/5 mb-3 space-y-1">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="font-semibold text-accent-gold flex items-center gap-1">
+                                    <Award className="w-3.5 h-3.5" /> Bronze Tier
+                                  </span>
+                                  <span className="text-[10px] text-cream-beige/50 uppercase tracking-widest font-sans font-bold">Loyalty</span>
+                                </div>
+                                <div className="flex justify-between items-baseline pt-1">
+                                  <span className="font-serif font-extrabold text-lg text-cream-beige">{user.loyalty.availablePoints}</span>
+                                  <span className="text-[9px] text-cream-beige/40 font-medium">Available Points</span>
+                                </div>
+                              </div>
+                            )}
+                            
+                            <button
+                              onClick={async () => {
+                                setIsUserDropdownOpen(false);
+                                await logout();
+                                addToast('Logged out successfully', 'info');
+                              }}
+                              className="w-full py-2 px-3.5 rounded-xl bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/20 text-cream-beige hover:text-red-400 text-xs font-semibold font-sans flex items-center justify-center gap-2 transition-all cursor-pointer"
+                            >
+                              <LogOut className="w-4 h-4" /> Log Out
+                            </button>
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setIsAuthModalOpen(true);
+                      setAuthError('');
+                    }}
+                    className={`p-2 rounded-xl flex items-center gap-1.5 transition-all hover:bg-white/10 ${
+                      isScrolled ? 'text-current' : 'text-cream-beige'
+                    }`}
+                    title="Sign In"
+                  >
+                    <LogIn className="w-5 h-5 text-accent-gold" />
+                    <span className="hidden sm:inline text-xs font-semibold">Sign In</span>
+                  </button>
+                )}
+              </div>
 
               {/* Cart Icon with Badge */}
               <button
@@ -303,6 +396,187 @@ export const Navbar: React.FC = () => {
                   <div className="py-8 text-center text-cream-beige/40 text-xs font-sans uppercase tracking-wider">
                     Type above to search the BrewNest menu
                   </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Auth Modal (Sign In / Register) */}
+      <AnimatePresence>
+        {isAuthModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
+            {/* Backdrop click close */}
+            <div className="absolute inset-0" onClick={() => setIsAuthModalOpen(false)} />
+
+            {/* Modal Container */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative bg-dark-espresso text-cream-beige max-w-md w-full rounded-3xl border border-accent-gold/20 p-6 md:p-8 shadow-2xl z-10 overflow-hidden"
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setIsAuthModalOpen(false)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-white/5 hover:bg-white/10 text-cream-beige hover:text-accent-gold transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Title / Tab Selector */}
+              <div className="text-center mb-6">
+                <Coffee className="w-10 h-10 text-accent-gold mx-auto mb-2.5" />
+                <h3 className="font-serif text-2xl font-bold mb-1">
+                  {authMode === 'login' ? 'Welcome Back' : 'Create Account'}
+                </h3>
+                <p className="text-xs text-cream-beige/50 font-sans">
+                  {authMode === 'login' ? 'Sign in to sync your cart, orders & loyalty points' : 'Join BrewNest loyalty and earn points on every cup'}
+                </p>
+              </div>
+
+              {authError && (
+                <div className="p-3 mb-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs text-center font-sans">
+                  {authError}
+                </div>
+              )}
+
+              {/* Form */}
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setAuthLoading(true);
+                  setAuthError('');
+                  try {
+                    if (authMode === 'login') {
+                      await login(email, password);
+                      addToast('Welcome back to BrewNest! ☕', 'success');
+                    } else {
+                      await register({
+                        email,
+                        password,
+                        firstName,
+                        lastName: lastName || null,
+                        phone: phone || null,
+                      });
+                      addToast('Account created successfully! Welcome to BrewNest. 🎉☕', 'success');
+                    }
+                    setIsAuthModalOpen(false);
+                    // Reset forms
+                    setEmail('');
+                    setPassword('');
+                    setFirstName('');
+                    setLastName('');
+                    setPhone('');
+                  } catch (err: any) {
+                    setAuthError(err.message || 'Authentication failed. Please try again.');
+                  } finally {
+                    setAuthLoading(false);
+                  }
+                }}
+                className="space-y-4"
+              >
+                {authMode === 'register' && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[10px] uppercase font-sans font-bold tracking-wider text-cream-beige/40 block mb-1">First Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="John"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-cream-beige placeholder-cream-beige/25 text-sm focus:outline-none focus:border-accent-gold/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase font-sans font-bold tracking-wider text-cream-beige/40 block mb-1">Last Name</label>
+                      <input
+                        type="text"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Doe"
+                        className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-cream-beige placeholder-cream-beige/25 text-sm focus:outline-none focus:border-accent-gold/50"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="text-[10px] uppercase font-sans font-bold tracking-wider text-cream-beige/40 block mb-1">Email Address</label>
+                  <input
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="john@example.com"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-cream-beige placeholder-cream-beige/25 text-sm focus:outline-none focus:border-accent-gold/50"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] uppercase font-sans font-bold tracking-wider text-cream-beige/40 block mb-1">Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-cream-beige placeholder-cream-beige/25 text-sm focus:outline-none focus:border-accent-gold/50"
+                  />
+                </div>
+
+                {authMode === 'register' && (
+                  <div>
+                    <label className="text-[10px] uppercase font-sans font-bold tracking-wider text-cream-beige/40 block mb-1">Phone Number (Optional)</label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+1 (555) 000-0000"
+                      className="w-full px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-cream-beige placeholder-cream-beige/25 text-sm focus:outline-none focus:border-accent-gold/50"
+                    />
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={authLoading}
+                  className="w-full py-3 mt-2 rounded-xl bg-accent-gold hover:bg-accent-gold/90 disabled:bg-accent-gold/50 text-dark-espresso font-semibold font-sans text-sm flex items-center justify-center gap-2 shadow-lg transition-transform hover:scale-[1.02] active:scale-95 cursor-pointer"
+                >
+                  {authLoading ? 'Authenticating...' : authMode === 'login' ? 'Sign In' : 'Create Account'}
+                </button>
+              </form>
+
+              {/* Mode Toggle */}
+              <div className="text-center mt-6 pt-4 border-t border-white/5 text-xs text-cream-beige/60">
+                {authMode === 'login' ? (
+                  <p>
+                    Don't have an account?{' '}
+                    <button
+                      onClick={() => {
+                        setAuthMode('register');
+                        setAuthError('');
+                      }}
+                      className="text-accent-gold font-semibold underline ml-1 hover:text-cream-beige transition-colors cursor-pointer"
+                    >
+                      Sign up for free
+                    </button>
+                  </p>
+                ) : (
+                  <p>
+                    Already have an account?{' '}
+                    <button
+                      onClick={() => {
+                        setAuthMode('login');
+                        setAuthError('');
+                      }}
+                      className="text-accent-gold font-semibold underline ml-1 hover:text-cream-beige transition-colors cursor-pointer"
+                    >
+                      Sign in here
+                    </button>
+                  </p>
                 )}
               </div>
             </motion.div>
